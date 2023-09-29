@@ -1,8 +1,6 @@
 import flet as ft
-from time import sleep
 from api.data_warehouse import DataWarehouseApi
 import numpy
-from array import array
 import json
 
 
