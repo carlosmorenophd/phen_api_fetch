@@ -1,7 +1,11 @@
 {
     "cSpell.ignoreWords": [
+        "figsize",
         "flet",
-        "savetxt"
+        "ggplot",
+        "savetxt",
+        "xlabel",
+        "ylabel"
     ],
     "workbench.colorCustomizations": {
         "activityBar.background": "#0333b9"
