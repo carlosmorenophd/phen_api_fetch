@@ -46,3 +46,5 @@ class DataWarehouseApi:
             elif len(result) == 0:
                 return ""
         raise ValueError("Error on fetch to raw values")
+    
+    
