@@ -178,11 +178,16 @@ def save_raw_data(raw_data: customs.RawData):
     return db_raw_collection
 
 
-def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, name_csv: str):
+def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, name_csv: str) -> None:
     if os.path.exists(name_csv):
         os.remove(name_csv)
+    genotype_ids = raw_collection_field.genotype_ids
+    if len(raw_collection_field.genotype_ids) == 0:
+        result = genotypeCrud.find_ids()
+        print(type(result), result)
+        genotype_ids = result
     result = fieldCollectionCrud.find_by_raw_optional(
-        genotype_ids=raw_collection_field.genotype_ids)
+        genotype_ids=genotype_ids)
     trait_ids = raw_collection_field.trait_ids
     basic_column = ["name", "c_id", "s_id", "country",
                     "institute_name"]

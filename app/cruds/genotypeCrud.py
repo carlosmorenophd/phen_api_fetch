@@ -9,24 +9,6 @@ def find_by_id(id: int):
         raise ValueError("Genotype can not found")
 
 
-def create(genotype: schemas.Genotype):
-    db_entity = models.Genotype.filter(
-        models.Genotype.c_id == genotype.c_id
-    ).filter(
-        models.Genotype.s_id == genotype.s_id
-    ).first()
-    if db_entity:
-        return db_entity
-    db_entity = models.Genotype(
-        c_id=genotype.c_id,
-        s_id=genotype.s_id,
-        cross_name=genotype.cross_name,
-        history_name=genotype.history_name,
-    )
-    db_entity.save()
-    return db_entity
-
-
 def find_by_ids(c_id: int, s_id: int):
     genotype = models.Genotype.filter(
         models.Genotype.s_id == s_id
@@ -37,3 +19,11 @@ def find_by_ids(c_id: int, s_id: int):
         raise ValueError(
             "The genotype does not exist {}-{}".format(c_id, s_id))
     return genotype
+
+
+def find_ids() -> list:
+    """Get all id from genotype entity
+    Returns:
+        list: list of id sorter less to more
+    """
+    return [genotype.id for genotype in models.Genotype.select(models.Genotype.id).order_by(models.Genotype.id)]
