@@ -1,5 +1,7 @@
 {
     "cSpell.ignoreWords": [
+        "dotenv",
+        "fastapi",
         "figsize",
         "flet",
         "ggplot",
