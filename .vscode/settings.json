@@ -1,13 +1,17 @@
 {
     "cSpell.ignoreWords": [
+        "backref",
+        "dotenv",
+        "fastapi",
         "figsize",
         "flet",
         "ggplot",
+        "pydantic",
         "savetxt",
         "xlabel",
         "ylabel"
     ],
     "workbench.colorCustomizations": {
-        "activityBar.background": "#0333b9"
+        "activityBar.background": "#a4b1d6"
     },
 }
