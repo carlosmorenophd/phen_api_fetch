@@ -1,10 +1,12 @@
 {
     "cSpell.ignoreWords": [
+        "backref",
         "dotenv",
         "fastapi",
         "figsize",
         "flet",
         "ggplot",
+        "pydantic",
         "savetxt",
         "xlabel",
         "ylabel"

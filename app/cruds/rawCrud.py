@@ -193,10 +193,26 @@ def list_query_ids(
             map(
                 lambda id: customs.ResponseTarget(
                     id=id.id,
-                    name=id.description
+                    name="{} [{}-{}:{},{}-{}:{},{}]".format(
+                        id.country,
+                        id.latitude,
+                        id.latitude_degrees,
+                        id.latitude_minutes,
+                        id.longitude,
+                        id.longitude_degrees,
+                        id.longitude_minutes,
+                        id.altitude,
+                    )
                 ), models.Location.select(
                     models.Location.id,
-                    models.Location.country
+                    models.Location.country,
+                    models.Location.latitude,
+                    models.Location.latitude_degrees,
+                    models.Location.latitude_minutes,
+                    models.Location.longitude,
+                    models.Location.longitude_degrees,
+                    models.Location.longitude_minutes,
+                    models.Location.altitude,
                 ).order_by(models.Location.id).execute()))
     elif target == customs.EntityTarget.trait:
         return list(
