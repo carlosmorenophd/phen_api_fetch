@@ -183,12 +183,12 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
         os.remove(name_csv)
     genotype_ids = raw_collection_field.genotype_ids
     if len(raw_collection_field.genotype_ids) == 0:
-        result = genotypeCrud.find_ids()
-        print(type(result), result)
-        genotype_ids = result
+        genotype_ids = genotypeCrud.find_ids()
     result = fieldCollectionCrud.find_by_raw_optional(
         genotype_ids=genotype_ids)
     trait_ids = raw_collection_field.trait_ids
+    if len(raw_collection_field.trait_ids) == 0:
+        trait_ids = traitCrud.find_ids()
     basic_column = ["name", "c_id", "s_id", "country",
                     "institute_name"]
     trait_column = []
@@ -267,8 +267,9 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
             else:
                 save.append("")
         write_on_csv(name_csv=name_csv, list_element=save)
-    # TODO: Adding only trait that was valid
-    # TODO: adding parameter to request
+    
+    #TODO: Adding only trait that was valid
+    #TODO: adding parameter to request
     #     for head in head_column:
     #         print(head)
 
