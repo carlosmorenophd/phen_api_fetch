@@ -1,6 +1,6 @@
 from peewee import CharField, ForeignKeyField, IntegerField, Model, TextField
 
-from app.database import db
+from database import db
 
 
 class WebFile(Model):

@@ -1,5 +1,5 @@
-from app import models
-from app.schemas import schemas, customs
+import models
+from schemas import schemas, customs
 
 # TODO: Convertir en dinamica para poder seleccionar con una lista de traits
 # TODO: soportar la unidad dentro de los traits

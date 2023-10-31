@@ -8,6 +8,7 @@
         "ggplot",
         "pydantic",
         "savetxt",
+        "uvicorn",
         "xlabel",
         "ylabel"
     ],

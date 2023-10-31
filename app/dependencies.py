@@ -1,5 +1,5 @@
-from app.database import db_state_default
-from app import database
+from database import db_state_default
+import database
 from fastapi import Depends
 
 

@@ -1,5 +1,5 @@
-from app import models
-from app.schemas import schemas
+import models
+from schemas import schemas
 
 
 def find_by_id(id: int):

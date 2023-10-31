@@ -1,7 +1,7 @@
 import os
-from app.schemas import customs, schemas
+from schemas import customs, schemas
 from csv import writer
-from app.cruds import (
+from cruds import (
     fieldCollectionCrud,
     genotypeCrud,
     locationCrud,
@@ -11,7 +11,7 @@ from app.cruds import (
     unitCrud,
     webFileCrud,
 )
-from app.services.MeanRawCountryInstituteService import MeanRawCountryInstitute
+from services.MeanRawCountryInstituteService import MeanRawCountryInstitute
 
 
 def get_raw_join_all(raw_filter: customs.RawAllFilter) -> str:
@@ -204,6 +204,7 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
                           id, field.raw_collections)
             for raw in raws:
                 genotype_key = str(raw.genotype.id)
+                #TODO: create a new id to validate by genotype, location, agricola-year
                 if not genotype_key in data_sheet:
                     data_sheet[genotype_key] = {}
                     data_sheet[genotype_key]["name"] = raw.genotype.cross_name
@@ -232,13 +233,15 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
         else:
             trait_with_out_repetition[trait.split(
                 ":")[0]] = trait_with_out_repetition[trait.split(":")[0]] + [trait]
-    print("[2-1][0-{}]".format(len(data_sheet)))
+    print("Step - [2-1][0-{}]".format(len(data_sheet)))
     i = 0
+    yields_avg = {}
     for key_sheet in data_sheet:
         print("[2-1][{}-{}]".format(i, len(data_sheet)))
         i = i + 1
         for key_trait in trait_with_out_repetition:
-            name = "{}:avg".format(key_trait)
+            name = "{}:{}:avg".format(
+                key_trait, trait_with_out_repetition[key_trait][0].split(":")[2])
             data_sheet[key_sheet][name] = ""
             trait_column = adding_whit_out_retired(
                 item=name, list_array=trait_column)
@@ -252,6 +255,13 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
                         avg_count = avg_count + 1
             if avg_sum != 0:
                 data_sheet[key_sheet][name] = avg_sum / avg_count
+            if key_trait == "GRAIN_YIELD":
+                yield_key = "{}-{}".format(data_sheet[key_sheet]["c_id"],
+                                           data_sheet[key_sheet]["s_id"])
+                if not yield_key in yields_avg:
+                    yields_avg[yield_key] = [data_sheet[key_sheet][name]]
+                else:
+                    yields_avg[yield_key].append(data_sheet[key_sheet][name])
     trait_column.sort()
     head_column = basic_column + trait_column
     write_on_csv(name_csv=name_csv, list_element=head_column)
@@ -267,9 +277,9 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
             else:
                 save.append("")
         write_on_csv(name_csv=name_csv, list_element=save)
-    
-    #TODO: Adding only trait that was valid
-    #TODO: adding parameter to request
+
+    # TODO: Adding only trait that was valid
+    # TODO: adding parameter to request
     #     for head in head_column:
     #         print(head)
 

@@ -1,5 +1,5 @@
-from app.schemas import customs, schemas
-from app.cruds import (
+from schemas import customs, schemas
+from cruds import (
     environmentDefinitionCrud,
     fieldCollectionCrud,
     fieldCollectionEnvironmentCrud,

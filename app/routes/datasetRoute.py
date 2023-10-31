@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_pagination import Page, paginate
-from app.schemas import schemas, customs
-from app.cruds import rawCrud
-from app.dependencies import get_db
-from app.services import rawService, environmentDataService
+from schemas import schemas, customs
+from cruds import rawCrud
+from dependencies import get_db
+from services import rawService, environmentDataService
 
 
 router = APIRouter(

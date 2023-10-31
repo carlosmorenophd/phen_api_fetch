@@ -1,5 +1,5 @@
-from app.schemas import schemas
-from app import models
+from schemas import schemas
+import models
 
 
 def get_or_create(trial: schemas.TrialCreate):
