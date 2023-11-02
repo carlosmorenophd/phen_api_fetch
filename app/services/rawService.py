@@ -179,8 +179,7 @@ def save_raw_data(raw_data: customs.RawData):
 
 
 def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, name_csv: str) -> None:
-    if os.path.exists(name_csv):
-        os.remove(name_csv)
+    name_csv_origin, name_csv_dataset = pre_files(name_csv=name_csv)
     genotype_ids = raw_collection_field.genotype_ids
     if len(raw_collection_field.genotype_ids) == 0:
         genotype_ids = genotypeCrud.find_ids()
@@ -193,8 +192,8 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
                     "institute_name"]
     trait_column = []
     data_sheet = {}
-    print("[1-3]-[0-{}]".format(len(result)))
-    i = 0
+    print("[1-3]-[{}]".format(len(result)))
+    i = 1
     for field in result:
         print("[1-3]-[{}-{}]".format(i, len(result)))
         i = i+1
@@ -203,27 +202,26 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
             raws = filter(lambda raw: raw.trait.id ==
                           id, field.raw_collections)
             for raw in raws:
-                genotype_key = str(raw.genotype.id)
-                #TODO: create a new id to validate by genotype, location, agricola-year
-                if not genotype_key in data_sheet:
-                    data_sheet[genotype_key] = {}
-                    data_sheet[genotype_key]["name"] = raw.genotype.cross_name
-                    data_sheet[genotype_key]["c_id"] = raw.genotype.c_id
-                    data_sheet[genotype_key]["s_id"] = raw.genotype.s_id
-                    data_sheet[genotype_key]["country"] = field.location.country
-                    data_sheet[genotype_key]["institute_name"] = field.location.institute_name
+                data_sheet_key = "{}-{}".format(str(raw.genotype.id),str(raw.field_collection.id))
+                if not data_sheet_key in data_sheet:
+                    data_sheet[data_sheet_key] = {}
+                    data_sheet[data_sheet_key]["name"] = raw.genotype.cross_name
+                    data_sheet[data_sheet_key]["c_id"] = raw.genotype.c_id
+                    data_sheet[data_sheet_key]["s_id"] = raw.genotype.s_id
+                    data_sheet[data_sheet_key]["country"] = field.location.country
+                    data_sheet[data_sheet_key]["institute_name"] = field.location.institute_name
                     for environment in field.field_environments:
                         environment_name = "{}:({})".format(
                             environment.environment_definition.name, environment.unit.name)
                         basic_column = adding_whit_out_retired(
                             item=environment_name, list_array=basic_column)
-                        data_sheet[genotype_key][environment_name] = environment.value_data
+                        data_sheet[data_sheet_key][environment_name] = environment.value_data
                 unit = unitCrud.find_by_id(raw.unit.id)
                 name_trait = "{}:{}:({})".format(
                     trait.name, raw.repetition, unit.name)
                 adding_whit_out_retired(
                     item=name_trait, list_array=trait_column)
-                data_sheet[genotype_key][name_trait] = raw.value_data
+                data_sheet[data_sheet_key][name_trait] = raw.value_data
     trait_column.sort()
     trait_with_out_repetition = {}
     for trait in trait_column:
@@ -233,11 +231,11 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
         else:
             trait_with_out_repetition[trait.split(
                 ":")[0]] = trait_with_out_repetition[trait.split(":")[0]] + [trait]
-    print("Step - [2-1][0-{}]".format(len(data_sheet)))
-    i = 0
+    print("[2-3][{}]".format(len(data_sheet)))
+    i = 1
     yields_avg = {}
     for key_sheet in data_sheet:
-        print("[2-1][{}-{}]".format(i, len(data_sheet)))
+        print("[2-3][{}-{}]".format(i, len(data_sheet)))
         i = i + 1
         for key_trait in trait_with_out_repetition:
             name = "{}:{}:avg".format(
@@ -264,11 +262,11 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
                     yields_avg[yield_key].append(data_sheet[key_sheet][name])
     trait_column.sort()
     head_column = basic_column + trait_column
-    write_on_csv(name_csv=name_csv, list_element=head_column)
-    print("[2-1][0-{}]".format(len(data_sheet)))
-    i = 0
+    write_on_csv(name_csv=name_csv_origin, list_element=head_column)
+    print("[3-3][{}]".format(len(data_sheet)))
+    i = 1
     for key_sheet in data_sheet:
-        print("[2-1][{}-{}]".format(i, len(data_sheet)))
+        print("[3-3][{}-{}]".format(i, len(data_sheet)))
         i = i + 1
         save = []
         for head in head_column:
@@ -276,7 +274,7 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
                 save.append(data_sheet[key_sheet][head])
             else:
                 save.append("")
-        write_on_csv(name_csv=name_csv, list_element=save)
+        write_on_csv(name_csv=name_csv_origin, list_element=save)
 
     # TODO: Adding only trait that was valid
     # TODO: adding parameter to request
@@ -298,3 +296,12 @@ def is_float(num):
         return True
     except ValueError:
         return False
+    
+def pre_files(name_csv: str)-> tuple:
+    name_csv_origin = "origin_{}".format(name_csv)
+    name_csv_dataset = "dataset_{}".format(name_csv)
+    if os.path.exists(name_csv_origin):
+        os.remove(name_csv_origin)
+    if os.path.exists(name_csv_dataset):
+        os.remove(name_csv_dataset)
+    return name_csv_origin, name_csv_dataset

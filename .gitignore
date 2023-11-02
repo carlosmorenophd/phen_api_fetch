@@ -145,3 +145,4 @@ cython_debug/
 
 .~lock*
 test.csv
+*test.csv
