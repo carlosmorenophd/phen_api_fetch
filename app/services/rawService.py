@@ -192,7 +192,7 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
                     "institute_name"]
     trait_column = []
     data_sheet = {}
-    print("[1-3]-[{}]".format(len(result)))
+    print("[1-4]-[{}]- Get data".format(len(result)))
     i = 1
     for field in result:
         print("[1-3]-[{}-{}]".format(i, len(result)))
@@ -231,11 +231,11 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
         else:
             trait_with_out_repetition[trait.split(
                 ":")[0]] = trait_with_out_repetition[trait.split(":")[0]] + [trait]
-    print("[2-3][{}]".format(len(data_sheet)))
+    print("[2-4]-[{}]- Calculate average".format(len(data_sheet)))
     i = 1
     yields_avg = {}
     for key_sheet in data_sheet:
-        print("[2-3][{}-{}]".format(i, len(data_sheet)))
+        print("[2-3]-[{}-{}]".format(i, len(data_sheet)))
         i = i + 1
         for key_trait in trait_with_out_repetition:
             name = "{}:{}:avg".format(
@@ -261,15 +261,34 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
                 else:
                     yields_avg[yield_key].append(data_sheet[key_sheet][name])
     trait_column.sort()
-    head_column = basic_column + trait_column
-    write_on_csv(name_csv=name_csv_origin, list_element=head_column)
-    print("[3-3][{}]".format(len(data_sheet)))
+    head_columns = basic_column + trait_column
+    write_on_csv(name_csv=name_csv_origin, list_element=head_columns)
+    print("[3-4]-[{}]- Store on csv".format(len(data_sheet)))
+    i = 1
+    for key_sheet in data_sheet:
+        print("[3-4]-[{}-{}]".format(i, len(data_sheet)))
+        i = i + 1
+        save = []
+        for head in head_columns:
+            if head in data_sheet[key_sheet]:
+                save.append(data_sheet[key_sheet][head])
+            else:
+                save.append("")
+        write_on_csv(name_csv=name_csv_origin, list_element=save)
+    head_columns_dataset = []
+    # TODO - get the number of repetition
+    for head in head_columns:
+        if not is_repetition(head_column=head):
+            head_columns_dataset.append(head)
+
+    write_on_csv(name_csv=name_csv_dataset, list_element=head_columns_dataset)
+    print("[4-4]-[{}]- Store on csv dataset".format(len(data_sheet)))
     i = 1
     for key_sheet in data_sheet:
         print("[3-3][{}-{}]".format(i, len(data_sheet)))
         i = i + 1
         save = []
-        for head in head_column:
+        for head in head_columns:
             if head in data_sheet[key_sheet]:
                 save.append(data_sheet[key_sheet][head])
             else:
@@ -305,3 +324,10 @@ def pre_files(name_csv: str)-> tuple:
     if os.path.exists(name_csv_dataset):
         os.remove(name_csv_dataset)
     return name_csv_origin, name_csv_dataset
+
+import re
+def is_repetition(head_column: str) -> bool:
+    search = re.compile(r":\d?:")
+    if search.search(head_column):
+        return True
+    return False
