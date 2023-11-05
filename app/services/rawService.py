@@ -287,7 +287,7 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
     for key_sheet in data_sheet:
         console.add_new_step()
         save = []
-        if 'EMERGENCE_DATE:(date)' in head_columns_dataset:
+        if 'EMERGENCE_DATE:(date)' in data_sheet[key_sheet]:
             start_date = convert_date_BDY(
                 data_sheet[key_sheet]['EMERGENCE_DATE:(date)'])
             if data_sheet[key_sheet]['GRAIN_YIELD:(t/ha):avg']:
