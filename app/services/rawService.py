@@ -1,3 +1,4 @@
+import re
 import os
 from schemas import customs, schemas
 from csv import writer
@@ -12,6 +13,8 @@ from cruds import (
     webFileCrud,
 )
 from services.MeanRawCountryInstituteService import MeanRawCountryInstitute
+from services.util.ProgressConsole import ProgressConsole
+from services.util.convert import convert_date_BDY, diff_date
 
 
 def get_raw_join_all(raw_filter: customs.RawAllFilter) -> str:
@@ -192,17 +195,18 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
                     "institute_name"]
     trait_column = []
     data_sheet = {}
-    print("[1-3]-[{}]".format(len(result)))
-    i = 1
+    console = ProgressConsole(total_phase=4)
+
+    console.add_new_phase(message="Get data", total_step=len(result))
     for field in result:
-        print("[1-3]-[{}-{}]".format(i, len(result)))
-        i = i+1
+        console.add_new_step()
         for id in trait_ids:
             trait = traitCrud.find_by_id(id)
             raws = filter(lambda raw: raw.trait.id ==
                           id, field.raw_collections)
             for raw in raws:
-                data_sheet_key = "{}-{}".format(str(raw.genotype.id),str(raw.field_collection.id))
+                data_sheet_key = "{}-{}".format(str(raw.genotype.id),
+                                                str(raw.field_collection.id))
                 if not data_sheet_key in data_sheet:
                     data_sheet[data_sheet_key] = {}
                     data_sheet[data_sheet_key]["name"] = raw.genotype.cross_name
@@ -231,12 +235,11 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
         else:
             trait_with_out_repetition[trait.split(
                 ":")[0]] = trait_with_out_repetition[trait.split(":")[0]] + [trait]
-    print("[2-3][{}]".format(len(data_sheet)))
-    i = 1
     yields_avg = {}
+    console.add_new_phase(message="Calculate average",
+                          total_step=len(data_sheet))
     for key_sheet in data_sheet:
-        print("[2-3][{}-{}]".format(i, len(data_sheet)))
-        i = i + 1
+        console.add_new_step()
         for key_trait in trait_with_out_repetition:
             name = "{}:{}:avg".format(
                 key_trait, trait_with_out_repetition[key_trait][0].split(":")[2])
@@ -261,20 +264,46 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
                 else:
                     yields_avg[yield_key].append(data_sheet[key_sheet][name])
     trait_column.sort()
-    head_column = basic_column + trait_column
-    write_on_csv(name_csv=name_csv_origin, list_element=head_column)
-    print("[3-3][{}]".format(len(data_sheet)))
-    i = 1
+    head_columns = basic_column + trait_column
+    write_on_csv(name_csv=name_csv_origin, list_element=head_columns)
+    console.add_new_phase(message="Store on csv", total_step=len(data_sheet))
     for key_sheet in data_sheet:
-        print("[3-3][{}-{}]".format(i, len(data_sheet)))
-        i = i + 1
+        console.add_new_step()
         save = []
-        for head in head_column:
+        for head in head_columns:
             if head in data_sheet[key_sheet]:
                 save.append(data_sheet[key_sheet][head])
             else:
                 save.append("")
         write_on_csv(name_csv=name_csv_origin, list_element=save)
+
+    head_columns_dataset = []
+    for head in head_columns:
+        if not is_repetition(head_column=head):
+            head_columns_dataset.append(head)
+    write_on_csv(name_csv=name_csv_dataset, list_element=head_columns_dataset)
+    console.add_new_phase(message="Store on csv dataset",
+                          total_step=len(data_sheet))
+    for key_sheet in data_sheet:
+        console.add_new_step()
+        save = []
+        if 'EMERGENCE_DATE:(date)' in head_columns_dataset:
+            start_date = convert_date_BDY(
+                data_sheet[key_sheet]['EMERGENCE_DATE:(date)'])
+            if data_sheet[key_sheet]['GRAIN_YIELD:(t/ha):avg']:
+                for head in head_columns_dataset:
+                    if head in data_sheet[key_sheet]:
+                        if head.find("(date)") > 0:
+                            if head == 'EMERGENCE_DATE:(date)':
+                                save.append(1)
+                            else:
+                                save.append(diff_date(start_date, convert_date_BDY(
+                                    data_sheet[key_sheet][head])))
+                        else:
+                            save.append(data_sheet[key_sheet][head])
+                    else:
+                        save.append("")
+                write_on_csv(name_csv=name_csv_dataset, list_element=save)
 
     # TODO: Adding only trait that was valid
     # TODO: adding parameter to request
@@ -296,8 +325,9 @@ def is_float(num):
         return True
     except ValueError:
         return False
-    
-def pre_files(name_csv: str)-> tuple:
+
+
+def pre_files(name_csv: str) -> tuple:
     name_csv_origin = "origin_{}".format(name_csv)
     name_csv_dataset = "dataset_{}".format(name_csv)
     if os.path.exists(name_csv_origin):
@@ -305,3 +335,10 @@ def pre_files(name_csv: str)-> tuple:
     if os.path.exists(name_csv_dataset):
         os.remove(name_csv_dataset)
     return name_csv_origin, name_csv_dataset
+
+
+def is_repetition(head_column: str) -> bool:
+    search = re.compile(r":\d?:")
+    if search.search(head_column):
+        return True
+    return False
