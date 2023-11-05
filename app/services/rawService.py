@@ -276,11 +276,11 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
             else:
                 save.append("")
         write_on_csv(name_csv=name_csv_origin, list_element=save)
+
     head_columns_dataset = []
     for head in head_columns:
         if not is_repetition(head_column=head):
             head_columns_dataset.append(head)
-
     write_on_csv(name_csv=name_csv_dataset, list_element=head_columns_dataset)
     console.add_new_phase(message="Store on csv dataset",
                           total_step=len(data_sheet))
