@@ -299,6 +299,22 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
                             else:
                                 save.append(diff_date(start_date, convert_date_BDY(
                                     data_sheet[key_sheet][head])))
+                        elif head.find("(Y/N)") > 0:
+                            if head == "YES":
+                                save.append(1)
+                            else:
+                                save.append(0)
+                        elif head.find("(N/T/S/M/V)") > 0:
+                            if head[0] == "N":
+                                save.append(0)
+                            elif head[0] == "T":
+                                save.append(.25)
+                            elif head[0] == "S":
+                                save.append(.50)
+                            elif head[0] == "M":
+                                save.append(.75)
+                            elif head[0] == "V":
+                                save.append(1)
                         else:
                             save.append(data_sheet[key_sheet][head])
                     else:
