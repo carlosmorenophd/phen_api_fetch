@@ -14,7 +14,7 @@ from cruds import (
 )
 from services.MeanRawCountryInstituteService import MeanRawCountryInstitute
 from services.util.ProgressConsole import ProgressConsole
-from services.util.convert import convert_date_BDY, diff_date
+from services.util.convert import convert_date_BDY, transform_to_basic
 
 
 def get_raw_join_all(raw_filter: customs.RawAllFilter) -> str:
@@ -292,33 +292,14 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
                 data_sheet[key_sheet]['EMERGENCE_DATE:(date)'])
             if data_sheet[key_sheet]['GRAIN_YIELD:(t/ha):avg']:
                 for head in head_columns_dataset:
+                    value = None
                     if head in data_sheet[key_sheet]:
-                        if head.find("(date)") > 0:
-                            if head == 'EMERGENCE_DATE:(date)':
-                                save.append(1)
-                            else:
-                                save.append(diff_date(start_date, convert_date_BDY(
-                                    data_sheet[key_sheet][head])))
-                        elif head.find("(Y/N)") > 0:
-                            if head == "YES":
-                                save.append(1)
-                            else:
-                                save.append(0)
-                        elif head.find("(N/T/S/M/V)") > 0:
-                            if head[0] == "N":
-                                save.append(0)
-                            elif head[0] == "T":
-                                save.append(.25)
-                            elif head[0] == "S":
-                                save.append(.50)
-                            elif head[0] == "M":
-                                save.append(.75)
-                            elif head[0] == "V":
-                                save.append(1)
-                        else:
-                            save.append(data_sheet[key_sheet][head])
-                    else:
-                        save.append("")
+                        value = data_sheet[key_sheet][head]
+                    save.append(transform_to_basic(
+                        head=head,
+                        start_date=start_date,
+                        value=value,
+                    ))
                 write_on_csv(name_csv=name_csv_dataset, list_element=save)
 
     # TODO: Adding only trait that was valid
