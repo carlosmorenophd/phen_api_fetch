@@ -9,6 +9,14 @@ def diff_date(date_start: datetime, date_end: datetime) -> int:
     return (date_end - date_start).days
 
 
+def transform_to_basic_debug(head: str, start_date: datetime,  value: str, debug: bool = False) -> str:
+    result = transform_to_basic(head=head, start_date=start_date,  value=value)
+    if debug:
+        return "{} | {}".format(result, value)
+    else:
+        return result
+
+
 def transform_to_basic(head: str, start_date: datetime,  value: str) -> str:
     if value:
         if head.find("(date)") > 0:
@@ -33,7 +41,22 @@ def transform_to_basic(head: str, start_date: datetime,  value: str) -> str:
                 return "0.75"
             elif value[0] == "V":
                 return "1"
+        elif head.find("(S/N/D)") > 0:
+            if value[0] == "S":
+                return "0"
+            elif value[0] == "N":
+                return "0.5"
+            elif value[0] == "D":
+                return "1"
+        elif head.find("(E/N/L)") > 0:
+            if value[0] == "E":
+                return "0"
+            elif value[0] == "N":
+                return "0.5"
+            elif value[0] == "L":
+                return "1"
         else:
             return value
+
     else:
         return ""
