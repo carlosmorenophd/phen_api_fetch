@@ -14,7 +14,11 @@ from cruds import (
 )
 from services.MeanRawCountryInstituteService import MeanRawCountryInstitute
 from services.util.ProgressConsole import ProgressConsole
-from services.util.convert import convert_date_BDY, diff_date
+from services.util.convert import (
+    convert_date_BDY,
+    transform_to_basic,
+    transform_to_basic_debug
+)
 
 
 def get_raw_join_all(raw_filter: customs.RawAllFilter) -> str:
@@ -182,7 +186,8 @@ def save_raw_data(raw_data: customs.RawData):
 
 
 def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, name_csv: str) -> None:
-    name_csv_origin, name_csv_dataset = pre_files(name_csv=name_csv)
+    name_csv_origin, name_csv_dataset, name_csv_debug = pre_files(
+        name_csv=name_csv)
     genotype_ids = raw_collection_field.genotype_ids
     if len(raw_collection_field.genotype_ids) == 0:
         genotype_ids = genotypeCrud.find_ids()
@@ -191,11 +196,17 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
     trait_ids = raw_collection_field.trait_ids
     if len(raw_collection_field.trait_ids) == 0:
         trait_ids = traitCrud.find_ids()
-    basic_column = ["name", "c_id", "s_id", "country",
-                    "institute_name"]
+    basic_column = [
+        "name", 
+        "c_id", 
+        "s_id", 
+        "country",
+        "institute_name",
+        "web_file",
+    ]
     trait_column = []
     data_sheet = {}
-    console = ProgressConsole(total_phase=4)
+    console = ProgressConsole(total_phase=5)
 
     console.add_new_phase(message="Get data", total_step=len(result))
     for field in result:
@@ -214,6 +225,7 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
                     data_sheet[data_sheet_key]["s_id"] = raw.genotype.s_id
                     data_sheet[data_sheet_key]["country"] = field.location.country
                     data_sheet[data_sheet_key]["institute_name"] = field.location.institute_name
+                    data_sheet[data_sheet_key]["web_file"] = field.web_file.name
                     for environment in field.field_environments:
                         environment_name = "{}:({})".format(
                             environment.environment_definition.name, environment.unit.name)
@@ -281,9 +293,35 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
     for head in head_columns:
         if not is_repetition(head_column=head):
             head_columns_dataset.append(head)
-    write_on_csv(name_csv=name_csv_dataset, list_element=head_columns_dataset)
-    console.add_new_phase(message="Store on csv dataset",
-                          total_step=len(data_sheet))
+    store_dataset(
+        name_csv_dataset=name_csv_dataset,
+        console=console,
+        data_sheet=data_sheet,
+        valid_row=raw_collection_field.valid_row,
+        valid_column=raw_collection_field.valid_column,
+        head_columns_dataset=head_columns_dataset,
+    )
+    store_debug(
+        name_csv_debug=name_csv_debug,
+        head_columns_dataset=head_columns_dataset,
+        data_sheet=data_sheet,
+        console=console,
+    )
+
+
+def store_dataset(
+    name_csv_dataset: str,
+    head_columns_dataset: list,
+    data_sheet: list,
+    valid_row: int,
+    valid_column: int,
+    console,
+) -> None:
+    console.add_new_phase(
+        message="Store on csv dataset",
+        total_step=len(data_sheet),
+    )
+    data_new_filter = []
     for key_sheet in data_sheet:
         console.add_new_step()
         save = []
@@ -292,23 +330,85 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
                 data_sheet[key_sheet]['EMERGENCE_DATE:(date)'])
             if data_sheet[key_sheet]['GRAIN_YIELD:(t/ha):avg']:
                 for head in head_columns_dataset:
+                    value = None
                     if head in data_sheet[key_sheet]:
-                        if head.find("(date)") > 0:
-                            if head == 'EMERGENCE_DATE:(date)':
-                                save.append(1)
-                            else:
-                                save.append(diff_date(start_date, convert_date_BDY(
-                                    data_sheet[key_sheet][head])))
-                        else:
-                            save.append(data_sheet[key_sheet][head])
-                    else:
-                        save.append("")
-                write_on_csv(name_csv=name_csv_dataset, list_element=save)
+                        value = data_sheet[key_sheet][head]
+                    save.append(transform_to_basic(
+                        head=head,
+                        start_date=start_date,
+                        value=value,
+                    ))
+                data_new_filter.append(save)
+    empty_columns = [0] * len(head_columns_dataset)
+    empty_rows = [0] * len(data_new_filter)
+    number_valid_column = len(head_columns_dataset) - \
+        (valid_column * len(head_columns_dataset) / 100)
+    number_valid_row = len(data_new_filter) - \
+        (valid_row * len(data_new_filter) / 100)
+    j = 0
+    for raw in data_new_filter:
+        i = 0
+        for cell in raw:
+            if cell == "" or cell == "-":
+                empty_columns[i] = empty_columns[i] + 1
+                empty_rows[j] = empty_rows[j] + 1
+            i = i + 1
+        j = j + 1
+    i = 0
+    head_valid = []
+    for head in head_columns_dataset:
+        if empty_columns[i] <= number_valid_column:
+            head_valid.append(head)
+        i = i + 1
+    write_on_csv(
+        name_csv=name_csv_dataset,
+        list_element=head_valid,
+    )
+    j = 0
+    for raw in data_new_filter:
+        i = 0
+        if empty_rows[j] <= number_valid_row:
+            data_save = []
+            for cell in raw:
+                if empty_columns[i] <= number_valid_column:
+                    data_save.append(cell)
+                i = i + 1
+            write_on_csv(name_csv=name_csv_dataset, list_element=data_save)
+        j = j + 1
 
-    # TODO: Adding only trait that was valid
-    # TODO: adding parameter to request
-    #     for head in head_column:
-    #         print(head)
+
+def store_debug(
+    name_csv_debug: str,
+    head_columns_dataset: list,
+    data_sheet: list,
+    console,
+) -> None:
+    write_on_csv(name_csv=name_csv_debug, list_element=head_columns_dataset)
+    console.add_new_phase(
+        message="Store on csv debug",
+        total_step=len(data_sheet),
+    )
+    for key_sheet in data_sheet:
+        console.add_new_step()
+        save = []
+        if 'EMERGENCE_DATE:(date)' in data_sheet[key_sheet]:
+            start_date = convert_date_BDY(
+                data_sheet[key_sheet]['EMERGENCE_DATE:(date)'])
+            if data_sheet[key_sheet]['GRAIN_YIELD:(t/ha):avg']:
+                for head in head_columns_dataset:
+                    value = None
+                    if head in data_sheet[key_sheet]:
+                        value = data_sheet[key_sheet][head]
+                    save.append(transform_to_basic_debug(
+                        head=head,
+                        start_date=start_date,
+                        value=value,
+                        debug=True,
+                    ))
+                write_on_csv(
+                    name_csv=name_csv_debug,
+                    list_element=save,
+                )
 
 
 def adding_whit_out_retired(item: str, list_array: list) -> list:
@@ -330,11 +430,14 @@ def is_float(num):
 def pre_files(name_csv: str) -> tuple:
     name_csv_origin = "origin_{}".format(name_csv)
     name_csv_dataset = "dataset_{}".format(name_csv)
+    name_csv_debug = "debug_{}".format(name_csv)
     if os.path.exists(name_csv_origin):
         os.remove(name_csv_origin)
     if os.path.exists(name_csv_dataset):
         os.remove(name_csv_dataset)
-    return name_csv_origin, name_csv_dataset
+    if os.path.exists(name_csv_debug):
+        os.remove(name_csv_debug)
+    return name_csv_origin, name_csv_dataset, name_csv_debug
 
 
 def is_repetition(head_column: str) -> bool:
