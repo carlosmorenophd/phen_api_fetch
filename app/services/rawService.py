@@ -19,6 +19,7 @@ from services.util.convert import (
     transform_to_basic,
     transform_to_basic_debug
 )
+from ftp_client.FtpTransfer import FtpTransfer
 
 
 def get_raw_join_all(raw_filter: customs.RawAllFilter) -> str:
@@ -197,9 +198,9 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
     if len(raw_collection_field.trait_ids) == 0:
         trait_ids = traitCrud.find_ids()
     basic_column = [
-        "name", 
-        "c_id", 
-        "s_id", 
+        "name",
+        "c_id",
+        "s_id",
         "country",
         "institute_name",
         "web_file",
@@ -300,13 +301,19 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
         valid_row=raw_collection_field.valid_row,
         valid_column=raw_collection_field.valid_column,
         head_columns_dataset=head_columns_dataset,
+        date_start_count=raw_collection_field.date_start_count
     )
     store_debug(
         name_csv_debug=name_csv_debug,
         head_columns_dataset=head_columns_dataset,
         data_sheet=data_sheet,
         console=console,
+        date_start_count=raw_collection_field.date_start_count
     )
+    transfer = FtpTransfer()
+    transfer.transfer_csv(local_file=name_csv_origin)
+    transfer.transfer_csv(local_file=name_csv_debug)
+    transfer.transfer_csv(local_file=name_csv_dataset)
 
 
 def store_dataset(
@@ -316,6 +323,7 @@ def store_dataset(
     valid_row: int,
     valid_column: int,
     console,
+    date_start_count: str,
 ) -> None:
     console.add_new_phase(
         message="Store on csv dataset",
@@ -325,9 +333,9 @@ def store_dataset(
     for key_sheet in data_sheet:
         console.add_new_step()
         save = []
-        if 'EMERGENCE_DATE:(date)' in data_sheet[key_sheet]:
+        if f'{date_start_count}:(date)' in data_sheet[key_sheet]:
             start_date = convert_date_BDY(
-                data_sheet[key_sheet]['EMERGENCE_DATE:(date)'])
+                data_sheet[key_sheet][f'{date_start_count}:(date)'])
             if data_sheet[key_sheet]['GRAIN_YIELD:(t/ha):avg']:
                 for head in head_columns_dataset:
                     value = None
@@ -382,6 +390,7 @@ def store_debug(
     head_columns_dataset: list,
     data_sheet: list,
     console,
+    date_start_count: str,
 ) -> None:
     write_on_csv(name_csv=name_csv_debug, list_element=head_columns_dataset)
     console.add_new_phase(
@@ -391,9 +400,9 @@ def store_debug(
     for key_sheet in data_sheet:
         console.add_new_step()
         save = []
-        if 'EMERGENCE_DATE:(date)' in data_sheet[key_sheet]:
+        if f'{date_start_count}:(date)' in data_sheet[key_sheet]:
             start_date = convert_date_BDY(
-                data_sheet[key_sheet]['EMERGENCE_DATE:(date)'])
+                data_sheet[key_sheet][f'{date_start_count}:(date)'])
             if data_sheet[key_sheet]['GRAIN_YIELD:(t/ha):avg']:
                 for head in head_columns_dataset:
                     value = None
