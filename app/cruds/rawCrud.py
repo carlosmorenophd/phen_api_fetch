@@ -142,8 +142,8 @@ def search(id: int, raw_collection: customs.RawCollectionFilter):
     if raw_collection.occurrence != 0:
         query = query.where(
             models.RawCollection.occurrence == raw_collection.occurrence)
-    if raw_collection.cycle != "":
-        query = query.where(models.RawCollection.cycle == raw_collection.cycle)
+    # if raw_collection.agricultural_cycle != "":
+    #     query = query.where(models.RawCollection.cycle == raw_collection.agricultural_cycle)
     if raw_collection.gen_number != 0:
         query = query.where(models.RawCollection.gen_number ==
                             raw_collection.gen_number)
