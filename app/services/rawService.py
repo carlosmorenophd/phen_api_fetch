@@ -310,10 +310,10 @@ def search_field_data(raw_collection_field: customs.RawCollectionFieldFilter, na
         console=console,
         date_start_count=raw_collection_field.date_start_count
     )
-    transfer = FtpTransfer()
-    transfer.transfer_csv(local_file=name_csv_origin)
-    transfer.transfer_csv(local_file=name_csv_debug)
-    transfer.transfer_csv(local_file=name_csv_dataset)
+    # transfer = FtpTransfer()
+    # transfer.transfer_csv(local_file=name_csv_origin)
+    # transfer.transfer_csv(local_file=name_csv_debug)
+    # transfer.transfer_csv(local_file=name_csv_dataset)
 
 
 def store_dataset(
