@@ -61,4 +61,20 @@ async def search(raw_collection_field: customs.RawCollectionFieldFilter):
             status_code=404,
             detail= "Error -> {}".format(err)
         )
-    
+
+# @router.get(
+#     "/csv/environment",
+#     response_model=str,
+#     dependencies=[Depends(get_db)],
+#     description="Create a new field collection",
+# )
+# async def search(raw_collection_field: customs.RawCollectionFieldFilter):
+#     try:
+#         rawService.search_field_data(raw_collection_field=raw_collection_field, name_csv = "test.csv")
+#         return "OK"
+#     except ValueError as err:
+#         raise HTTPException(
+#             status_code=404,
+#             detail= "Error -> {}".format(err)
+#         )
+        
