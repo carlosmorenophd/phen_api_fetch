@@ -1,0 +1,24 @@
+# image: docker:latest
+
+stages:
+  - build
+  - deploy
+
+variables:
+  PROJECT_NAME: phen
+  IMAGE_NAME: api_fetch
+  IMAGE_TAG: 24.06
+
+build:
+  stage: build
+  script:
+    - docker build -t $PROJECT_NAME/$IMAGE_NAME:$IMAGE_TAG .
+
+deploy:
+  stage: deploy
+  before_script:
+    - echo "start"
+  script:
+    - ssh $DEPLOYMENT_HOST docker stop $IMAGE_NAME
+    - ssh $DEPLOYMENT_HOST docker rm -f $IMAGE_NAME
+    - ssh $DEPLOYMENT_HOST docker run -d --name $IMAGE_NAME $PROJECT_NAME/$IMAGE_NAME:$IMAGE_TAG
