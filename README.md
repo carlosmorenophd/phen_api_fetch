@@ -26,3 +26,18 @@ Run image in a container
 ```
 docker run -it -d --name dev_api_fetch -p 8092:8000 --network=net-phenotypic -v ${PWD}:/develop  phen/api_fetch:00.dev
 ```
+
+### About author
+
+
+In collaboration with the [Universidad Autonoma del Estado de Mexico](https://www.uaemex.mx/)  and supported by [CONAHCYT](https://conahcyt.mx/) scholarships, this project was created. For new features, changes, or improvements, please reach out to:
+
+Student, Ph.D.
+
+Juan Carlos Moreno Sanchez
+
+Please contact me at:
+
+<carlos.moreno.phd@gmail.com>
+
+<jcmorenos001@alumno.uaemex.mx>
