@@ -32,12 +32,25 @@ docker network create phen-net
 **Note:** If a network already exists, skip this instruction.
 
 
+1. Rename the file `example.env` to `.env` put the variables form user, password, host and ip for database and the port to expose the api service:
 
 
+```
+DATABASE=database_mariadb
+DATABASE_HOST=host_mariadb
+DATABASE_PORT=port_mariadb
+DATABASE_USERNAME=user_mariadb
+DATABASE_PASSWORD=password_user_mariadb
+PORT_API=8002
+```
+**Notes:**
+* Ensure all database connection parameters are correctly configured and that network connectivity between the API server and the database server is established.
 
+2. Command to run the container
 
-
-
+```shell
+docker compose -f compose.yaml up -d
+```
 
 ## Check application running
 
@@ -49,9 +62,9 @@ For example:
 
 On a local machine with the port set to 8002, the URL would be:
 
-`http://localhost:8002/docs`
+`http://localhost:8002/api/v1/docs`
 
-![Running API](README/img/Phen_api_store.png)
+![Running API](README/img/Phen_api_fetch.png)
 
 
 ## About author

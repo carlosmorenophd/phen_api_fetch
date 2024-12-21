@@ -26,7 +26,7 @@ db = MySQLDatabase(
     getenv("DATABASE"),
     host=getenv("DATABASE_HOST"),
     password=getenv("DATABASE_PASSWORD"),
-    port=int(getenv("DATABASE_SOCKET")),
+    port=int(getenv("DATABASE_PORT")),
     user=getenv("DATABASE_USERNAME"),
 )
 
