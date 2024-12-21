@@ -24,7 +24,7 @@ Docker is the only software required for this project. Please install it from th
 
 ## Run application
 
-The project utilizes multiple microservices. A Docker network will be created to facilitate inter-service communication.
+1. The project utilizes multiple microservices. A Docker network will be created to facilitate inter-service communication.
 
 ```shell
 docker network create phen-net
@@ -32,7 +32,7 @@ docker network create phen-net
 **Note:** If a network already exists, skip this instruction.
 
 
-1. Rename the file `example.env` to `.env` put the variables form user, password, host and ip for database and the port to expose the api service:
+2. Rename the file `example.env` to `.env` put the variables form user, password, host and ip for database and the port to expose the api service:
 
 
 ```
@@ -46,7 +46,7 @@ PORT_API=8002
 **Notes:**
 * Ensure all database connection parameters are correctly configured and that network connectivity between the API server and the database server is established.
 
-2. Command to run the container
+3. Command to run the container
 
 ```shell
 docker compose -f compose.yaml up -d
