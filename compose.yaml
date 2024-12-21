@@ -1,0 +1,20 @@
+services:
+  api:
+    container_name: phen_api_fetch
+    build:
+      context: api/
+    environment:
+      - DATABASE_USERNAME=${DATABASE_USERNAME}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE=${DATABASE}
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_PORT=${DATABASE_PORT}
+    networks:
+      phen-net:
+    ports:
+      - ${PORT_API}:8000
+
+networks:
+  phen-net:
+    external: true
+    name: phen-net

@@ -1,0 +1,17 @@
+annotated-types
+anyio
+click
+exceptiongroup
+fastapi
+fastapi-pagination
+h11
+idna
+peewee
+pydantic
+pydantic_core
+PyMySQL
+python-dotenv
+sniffio
+starlette
+typing_extensions
+uvicorn

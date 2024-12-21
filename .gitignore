@@ -12,6 +12,7 @@ coverage.xml
 test.db
 log.txt
 .venv
+.env
 
 # vim temporary files
 *~
